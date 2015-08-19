@@ -35,4 +35,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "guard"
   spec.add_development_dependency "guard-rspec"
   spec.add_development_dependency "shoulda-matchers"
+  spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "database_cleaner"
 end
