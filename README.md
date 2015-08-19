@@ -7,7 +7,7 @@ If you need to separate your dataset for different users or group of users using
 ## Install
 
  - Add to your gemfile: ```gem 'sandboxable', :git => 'git@github.com:INTERSAIL/sandboxable.git'```
- - Run bundle install
+ - Run ```bundle install```
 
 ### How to use
 
