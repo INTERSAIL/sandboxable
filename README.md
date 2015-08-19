@@ -4,6 +4,11 @@
 
 If you need to separate your dataset for different users or group of users using the same DB.
 
+## Install
+
+ - Add to your gemfile: gem 'sandboxable', :git => 'git@github.com:INTERSAIL/sandboxable.git'
+ - Run bundle install
+
 ### How to use
 
  - You need to include include Sandboxable::ActiveRecord in your model Class (it needs to extend ActiveRecord::Base).
