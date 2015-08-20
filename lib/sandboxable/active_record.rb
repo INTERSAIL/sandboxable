@@ -14,14 +14,14 @@ module Sandboxable
     end
 
     def set_sandbox_field
-      self.sandbox_id ||= self.sandbox_id
+      self.send("#{self.class.sandbox_field}=", Sandboxable::ActiveRecord.current_sandbox_id)
     end
 
     private :set_sandbox_field
 
     class << self
       def current_sandbox_id(new_value = nil)
-        @sandbox_id ||= new_value
+        @sandbox_id = new_value || @sandbox_id
       end
     end
 
@@ -42,7 +42,11 @@ module Sandboxable
       end
 
       def default_proc
-        -> { where(self.sandbox_field => Sandboxable::ActiveRecord.current_sandbox_id) }
+        unless Sandboxable::ActiveRecord.current_sandbox_id == -1
+          return -> { where(self.sandbox_field => Sandboxable::ActiveRecord.current_sandbox_id) }
+        end
+        # otherwise no default_scope
+        -> {}
       end
 
       def sandbox_field
