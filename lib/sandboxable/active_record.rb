@@ -2,8 +2,15 @@ module Sandboxable
   module ActiveRecord
     extend ::ActiveSupport::Concern
 
+    ANY_SANDBOX = -1
+
     included do
-      default_scope { @sandbox_proc || self.default_proc }
+      default_scope ->{
+        unless Sandboxable::ActiveRecord.current_sandbox_id == ANY_SANDBOX
+          return @sandbox_proc || self.default_proc
+        end
+        -> {}
+      }
       before_save :set_sandbox_field
     end
 
@@ -42,11 +49,7 @@ module Sandboxable
       end
 
       def default_proc
-        unless Sandboxable::ActiveRecord.current_sandbox_id == -1
-          return -> { where(self.sandbox_field => Sandboxable::ActiveRecord.current_sandbox_id) }
-        end
-        # otherwise no default_scope
-        -> {}
+        -> { where(self.sandbox_field => Sandboxable::ActiveRecord.current_sandbox_id) }
       end
 
       def sandbox_field
