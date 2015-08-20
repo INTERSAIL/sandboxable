@@ -2,8 +2,6 @@ module Sandboxable
   module ActiveRecord
     extend ::ActiveSupport::Concern
 
-    ANY_SANDBOX = -1
-
     included do
       default_scope ->{
         unless Sandboxable::ActiveRecord.current_sandbox_id == ANY_SANDBOX

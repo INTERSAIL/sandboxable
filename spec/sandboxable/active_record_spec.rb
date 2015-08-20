@@ -25,7 +25,7 @@ module Sandboxable
         end
       end
       describe 'jolly values' do
-        before { Sandboxable::ActiveRecord.current_sandbox_id -1 }
+        before { Sandboxable::ActiveRecord.current_sandbox_id Sandboxable::ANY_SANDBOX }
         it 'ignore default scopa if current_sandbox_id=-1' do
           expect(SandboxableModel.count).to eq(2)
         end

@@ -3,5 +3,5 @@ require "active_record"
 require "sandboxable/active_record"
 
 module Sandboxable
-  # Your code goes here...
+  ANY_SANDBOX = -1
 end
