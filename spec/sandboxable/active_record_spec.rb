@@ -11,13 +11,30 @@ module Sandboxable
     end
 
     describe '#as_json' do
-      it 'serializes the object except he sandbox_id field' do
-        expect(@s1.as_json).to eq({"id" => 1, "name" => "model_a", "another_sandbox_id" => 2})
+      context 'serialize_sandbox_field=true' do
+        before do
+          SandboxableModel.class_eval do
+            sandbox_with serialize_sandbox_field: false
+          end
+        end
+        it 'serializes the object except he sandbox_id field' do
+          expect(@s1.as_json).to eq({"id" => 1, "name" => "model_a", "another_sandbox_id" => 2})
+        end
+      end
+      context 'serialize_sandbox_field=false' do
+        before do
+          SandboxableModel.class_eval do
+            sandbox_with serialize_sandbox_field: true
+          end
+        end
+        it 'serializes the object as whole' do
+          expect(@s1.as_json).to eq({"id" => 1, "name" => "model_a", "sandbox_id" => 1, "another_sandbox_id" => 2})
+        end
       end
     end
 
     describe '#before_save' do
-      after { SandboxableModel.instance_variable_set("@sandbox_proc",nil) }
+      after { SandboxableModel.instance_variable_set("@sandbox_proc", nil) }
       context 'persist=true' do
         before do
           SandboxableModel.class_eval do
@@ -44,7 +61,7 @@ module Sandboxable
     describe '#default_scope' do
       describe 'jolly values' do
         before { Sandboxable::ActiveRecord.current_sandbox_id Sandboxable::ANY_SANDBOX }
-        it 'ignore default scopa if current_sandbox_id=-1' do
+        it 'ignore default scope if current_sandbox_id=-1' do
           expect(SandboxableModel.count).to eq(2)
         end
       end

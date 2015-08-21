@@ -37,6 +37,15 @@ If you need to separate your dataset for different users or group of users using
    end
    ```
  
+ - The sandbox_field won't be serialized by default, you can enable that by setting the serialize_sandbox_field option to true.
+   Example:
+    ```ruby
+    class Sandboxable < ActiveRecord::Base
+      include Sandboxable::ActiveRecord
+       
+      sandbox_with serialize_sandbox_field: true
+    end
+    ```
  - You can also use a proc for having a custom default scope. Example:
  ```ruby
  class Sandboxable < ActiveRecord::Base

@@ -29,7 +29,7 @@ module Sandboxable
     end
 
     def as_json(options={})
-      except = Array(options.delete(:except)) + [self.class.sandbox_field]
+      except = Array(options.delete(:except)) + [self.class.sandbox_field] unless self.class.serialize_sandbox_field
 
       super(options.merge(except: except))
     end
@@ -56,6 +56,7 @@ module Sandboxable
       #   - field: the sandbox_id field column name. default: :sandbox_id
       #   - persist: when true sets the sandbox_id field in the before_save callback to the
       #              Sandboxable::ActiveRecord.current_sandbox_id value. default: true
+      #   - serialize_sandbox_field: when false the sandbox_field will not be serialized default: false
       #
       # NOTE: You can pass a block it will be used as default scope instead of the default_proc
       #
@@ -67,9 +68,10 @@ module Sandboxable
       #     where(:test_id => self.current_sandbox_id)
       #   end
       def sandbox_with(options = {}, &block)
-        options.reverse_merge! field: :sandbox_id, persist: true
+        options.reverse_merge! field: :sandbox_id, persist: true, serialize_sandbox_field: false
         @sandbox_field = options[:field]
         @persist = options[:persist]
+        @serialize_sandbox_field = options[:serialize_sandbox_field]
         @sandbox_proc = block if block
       end
 
@@ -79,6 +81,10 @@ module Sandboxable
 
       def persist
         @persist.nil? ? true : @persist
+      end
+
+      def serialize_sandbox_field
+        @serialize_sandbox_field.nil? ? false : @serialize_sandbox_field
       end
     end
   end
