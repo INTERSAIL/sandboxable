@@ -20,7 +20,7 @@ module Sandboxable
 
     included do
       default_scope -> {
-        unless Sandboxable::ActiveRecord.current_sandbox_id == ANY_SANDBOX
+        unless Sandboxable::ActiveRecord.current_sandbox_id.to_i == ANY_SANDBOX
           return @sandbox_proc || Sandboxable::ActiveRecord.default_proc
         end
         -> {}
