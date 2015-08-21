@@ -6,7 +6,9 @@ module Sandboxable
       def populate_with_current_scope_attributes
         # == MonkeyPatch
         # Does not populate_with_current_scope attributes anymore. This is needed
-        # in order to solve the problem that automatically sets the sandbox_field value
+        # in order to solve a problem where the sandbox_field value is initialized
+        # always with the default_scope value, that will lead into problems for the
+        # creation of a record
         # == Original code
         # return unless self.class.scope_attributes?
         #

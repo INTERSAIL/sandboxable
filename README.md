@@ -51,5 +51,8 @@ If you need to separate your dataset for different users or group of users using
   NOTE: You can use ```Sandboxable::ANY_SANDBOX``` for current sandbox_id and that allow
   you to skip the sandbox_id data partitioning
  
+#### Additional Notes
+
+Be aware that this gem does a little MonkeyPatching to AR scopes, check Sandboxable::ActiveRecord.active_record.rb:5 for more info.
 
  
