@@ -2,6 +2,20 @@ module Sandboxable
   module ActiveRecord
     extend ::ActiveSupport::Concern
 
+    ::ActiveRecord::Scoping.class_eval do
+      def populate_with_current_scope_attributes
+        # == MonkeyPatch
+        # Does not populate_with_current_scope attributes anymore. This is needed
+        # in order to solve the problem that automatically sets the sandbox_field value
+        # == Original code
+        # return unless self.class.scope_attributes?
+        #
+        # self.class.scope_attributes.each do |att,value|
+        #   send("#{att}=", value) if respond_to?("#{att}=")
+        # end
+      end
+    end
+
     included do
       default_scope -> {
         unless Sandboxable::ActiveRecord.current_sandbox_id == ANY_SANDBOX

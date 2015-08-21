@@ -32,8 +32,7 @@ module Sandboxable
       context 'persist=false' do
         before do
           SandboxableModel.class_eval do
-            sandbox_with persist: false do
-            end
+            sandbox_with persist: false
           end
         end
         it "doesn't set the sandbox_id field", focus: true do
