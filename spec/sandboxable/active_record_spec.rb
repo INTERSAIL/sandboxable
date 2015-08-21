@@ -64,12 +64,6 @@ module Sandboxable
         it 'ignore default scope if current_sandbox_id=-1' do
           expect(SandboxableModel.count).to eq(2)
         end
-        context 'the jolly value is given as string' do
-          before { Sandboxable::ActiveRecord.current_sandbox_id Sandboxable::ANY_SANDBOX.to_s }
-          it 'ignore default scope if current_sandbox_id=-1' do
-            expect(SandboxableModel.count).to eq(2)
-          end
-        end
       end
       context 'sandbox_with not given' do
         it 'apply a default scope using field sandbox_id' do
