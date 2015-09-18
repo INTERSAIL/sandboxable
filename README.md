@@ -12,9 +12,9 @@ If you need to separate your dataset for different users or group of users using
 ### How to use
 
  - You need to include include Sandboxable::ActiveRecord in your model Class (it needs to extend ActiveRecord::Base).
- - You need to set globally the current sandbox id with: Sandboxable::ActiveRecord.current_sandbox_id(value)
+ - You need to set globally the current sandbox id with: Sandboxable::ActiveRecord.current_sandbox_id(value), you can also use the Kernel method current_sandbox_id if you like
 
- It Works! Now by default you filted all the rows with sandbox_id = Sandboxable::ActiveRecord.current_sandbox_id
+ It Works! Now by default you filtered all the rows with sandbox_id = Sandboxable::ActiveRecord.current_sandbox_id
 
 #### Options
 
