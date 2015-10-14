@@ -42,7 +42,11 @@ module Sandboxable
 
     class << self
       def current_sandbox_id(new_value = nil)
-        @current_sandbox_id = new_value || @current_sandbox_id
+        RequestStore.store[:current_sandbox_id] = new_value || RequestStore.store[:current_sandbox_id]
+      end
+
+      def current_sandbox_id=(new_value)
+        RequestStore.store[:current_sandbox_id] = new_value
       end
 
       def default_proc

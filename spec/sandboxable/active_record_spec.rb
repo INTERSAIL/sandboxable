@@ -96,5 +96,29 @@ module Sandboxable
         end
       end
     end
+
+    describe '#self.current_sandbox_id' do
+      context 'no value given' do
+        it 'returns the current_sandbox_id from RequestStore' do
+          expect(RequestStore.store).to receive(:[]=)
+          expect(RequestStore.store).to receive(:[]).with(:current_sandbox_id).and_return(1)
+          expect(subject.current_sandbox_id).to eq(1)
+        end
+      end
+      context 'value given' do
+        let(:v) { 2 }
+        it 'sets new value in RequestStore and return it' do
+          expect { subject.current_sandbox_id v }.to change { subject.current_sandbox_id }.to v
+          expect(RequestStore.store[:current_sandbox_id]).to eq v
+        end
+      end
+    end
+    describe '#=' do
+      let(:v) { 3 }
+      it 'sets new value in RequestStore' do
+        expect { subject.current_sandbox_id=v }.to change { subject.current_sandbox_id }.to v
+        expect(RequestStore.store[:current_sandbox_id]).to eq v
+      end
+    end
   end
 end
