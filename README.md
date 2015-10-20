@@ -65,8 +65,10 @@ If you need to separate your dataset for different users or group of users using
   You can skip the sandbox check in two ways:
      - using unscoped method: be aware that you loose also all the other default scopes that belongs to the model
      - using the without_sandbox method that accepts a block and runs the code inside ignoring the sandbox proc, example:
+           ```ruby
            Model.without_sandbox {|obj| obj.all}
- 
+           ```     
+              
 #### Additional Notes
 
 Be aware that this gem does a little MonkeyPatching to AR scopes, check Sandboxable::ActiveRecord.active_record.rb:5 for more info.
