@@ -20,7 +20,7 @@ module Sandboxable
 
     included do
       default_scope -> {
-        unless Sandboxable::ActiveRecord.current_sandbox_id == ANY_SANDBOX
+        unless Sandboxable::ActiveRecord.current_sandbox_id == ANY_SANDBOX || self.disabled
           return @sandbox_proc || Sandboxable::ActiveRecord.default_proc
         end
         -> {}
@@ -89,6 +89,22 @@ module Sandboxable
 
       def serialize_sandbox_field
         @serialize_sandbox_field.nil? ? false : @serialize_sandbox_field
+      end
+
+      # Allow you to pass a custom block that runs ignoring the sandbox proc
+      def without_sandbox(&proc)
+        self.disabled = true
+        res = proc.call(self)
+        self.disabled = false
+        res
+      end
+
+      def disabled
+        RequestStore.store[:sandbox_disabled]
+      end
+
+      def disabled=(val)
+        RequestStore.store[:sandbox_disabled] = val
       end
     end
   end

@@ -112,12 +112,38 @@ module Sandboxable
           expect(RequestStore.store[:current_sandbox_id]).to eq v
         end
       end
+      describe '#=' do
+        let(:v) { 3 }
+        it 'sets new value in RequestStore' do
+          expect { subject.current_sandbox_id=v }.to change { subject.current_sandbox_id }.to v
+          expect(RequestStore.store[:current_sandbox_id]).to eq v
+        end
+      end
     end
-    describe '#=' do
-      let(:v) { 3 }
-      it 'sets new value in RequestStore' do
-        expect { subject.current_sandbox_id=v }.to change { subject.current_sandbox_id }.to v
-        expect(RequestStore.store[:current_sandbox_id]).to eq v
+
+    describe '#without_sandbox' do
+      before do
+        SandboxableModel.class_eval do
+          sandbox_with do
+            where(:sandbox_id => Sandboxable::ActiveRecord.current_sandbox_id)
+          end
+        end
+      end
+      it "doesn't run any sandbox proc only for the chain call", focus: true do
+        expect(SandboxableModel.without_sandbox{|obj| obj.count}).to eq(2)
+        expect(SandboxableModel.count).to eq(1)
+      end
+    end
+
+    describe '#disabled' do
+      before { expect(RequestStore.store).to receive(:[]).with(:sandbox_disabled).and_return(true) }
+      it 'uses RequestStore and returns his sandbox_disabled value' do
+        expect(SandboxableModel.disabled).to be_truthy
+      end
+    end
+    describe '#disabled=' do
+      it 'uses RequestStore, sets and returns his sandbox_disabled value' do
+        expect{SandboxableModel.disabled=!SandboxableModel.disabled}.to change{SandboxableModel.disabled}
       end
     end
   end

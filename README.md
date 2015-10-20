@@ -28,7 +28,7 @@ If you need to separate your dataset for different users or group of users using
  end
  ```
  
- - The sandbox fiel value will be set before_save by default with the Sandboxable::ActiveRecord.current_sandbox_id value.
+ - The sandbox field value will be set before_save by default with the Sandboxable::ActiveRecord.current_sandbox_id value.
    To disable that pass the persist: false option. Example: 
   ```ruby
   class Sandboxable < ActiveRecord::Base
@@ -60,6 +60,12 @@ If you need to separate your dataset for different users or group of users using
   
   NOTE: You can use ```Sandboxable::ANY_SANDBOX``` for current sandbox_id and that allow
   you to skip the sandbox_id data partitioning
+ 
+##### Skip sandbox check
+  You can skip the sandbox check in two ways:
+     - using unscoped method: be aware that you loose also all the other default scopes that belongs to the model
+     - using the without_sandbox method that accepts a block and runs the code inside ignoring the sandbox proc, example:
+           Model.without_sandbox {|obj| obj.all}
  
 #### Additional Notes
 
