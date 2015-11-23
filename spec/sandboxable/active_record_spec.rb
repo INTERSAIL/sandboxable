@@ -17,7 +17,7 @@ module Sandboxable
             sandbox_with serialize_sandbox_field: false
           end
         end
-        it 'serializes the object except he sandbox_id field' do
+        it 'serializes the object without the sandbox_id field' do
           expect(@s1.as_json).to eq({"id" => 1, "name" => "model_a", "another_sandbox_id" => 2})
         end
       end
@@ -41,10 +41,21 @@ module Sandboxable
             sandbox_with persist: true
           end
         end
-        it 'sets the sandbox_id field value to Sandboxable::ActiveRecord.current_sandbox_id' do
-          expect(SandboxableModel.create(name: "persist=true").sandbox_id).to eq(1)
+        context 'set_sandbox_proc not given' do
+          it 'uses default_set_proc and sets the sandbox_id field value to Sandboxable::ActiveRecord.current_sandbox_id' do
+            expect(SandboxableModel.create(name: "persist=true").sandbox_id).to eq(1)
+          end
         end
-
+        context 'set_sandbox_proc given' do
+          before do
+            SandboxableModel.class_eval do
+              sandbox_with persist: true, set_sandbox_proc: ->{ 999 }
+            end
+          end
+          it 'uses the given proc to set the sandbox field' do
+            expect(SandboxableModel.create(name: "persist=true,sandbox_proc_given").sandbox_id).to eq(999)
+          end
+        end
       end
       context 'persist=false' do
         before do
@@ -52,7 +63,7 @@ module Sandboxable
             sandbox_with persist: false
           end
         end
-        it "doesn't set the sandbox_id field", focus: true do
+        it "doesn't set the sandbox_id field" do
           expect(SandboxableModel.create(name: "persist=false").sandbox_id).to be_nil
         end
       end
@@ -61,7 +72,7 @@ module Sandboxable
     describe '#default_scope' do
       describe 'jolly values' do
         before { Sandboxable::ActiveRecord.current_sandbox_id Sandboxable::ANY_SANDBOX }
-        it 'ignore default scope if current_sandbox_id=-1' do
+        it 'ignore default scope if current_sandbox_id=ANY_SANDBOX' do
           expect(SandboxableModel.count).to eq(2)
         end
       end
@@ -121,7 +132,7 @@ module Sandboxable
       end
     end
 
-    describe '#without_sandbox' do
+    describe '#self.without_sandbox' do
       before do
         SandboxableModel.class_eval do
           sandbox_with do
@@ -129,8 +140,8 @@ module Sandboxable
           end
         end
       end
-      it "doesn't run any sandbox proc only for the chain call", focus: true do
-        expect(SandboxableModel.without_sandbox{|obj| obj.count}).to eq(2)
+      it "doesn't run any sandbox proc only for the chain call" do
+        expect(SandboxableModel.without_sandbox { |obj| obj.count }).to eq(2)
         expect(SandboxableModel.count).to eq(1)
       end
     end
@@ -143,7 +154,23 @@ module Sandboxable
     end
     describe '#disabled=' do
       it 'uses RequestStore, sets and returns his sandbox_disabled value' do
-        expect{SandboxableModel.disabled=!SandboxableModel.disabled}.to change{SandboxableModel.disabled}
+        expect { SandboxableModel.disabled=!SandboxableModel.disabled }.to change { SandboxableModel.disabled }
+      end
+    end
+
+    describe 'builtin options' do
+      describe '#strategy' do
+        before do
+          SandboxableModel.class_eval do
+            sandbox_with strategy: "sandboxable/active_record/multiple_sandbox_strategy"
+          end
+        end
+        it 'uses the strategy class name given for default_set_proc' do
+          expect(SandboxableModel.instance_variable_get("@sandbox_proc").source_location).to eq(Sandboxable::ActiveRecord::MultipleSandboxStrategy.default_proc.source_location)
+        end
+        it 'uses the strategy class name given for default_proc' do
+          expect(SandboxableModel.set_sandbox_proc.source_location).to eq(Sandboxable::ActiveRecord::MultipleSandboxStrategy.default_set_proc.source_location)
+        end
       end
     end
   end

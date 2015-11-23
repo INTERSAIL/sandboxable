@@ -57,6 +57,23 @@ If you need to separate your dataset for different users or group of users using
      end
   end
   ```
+  - You can pass in a custom set_sandbox_proc to set a given sandbox_id when persisting the model; the code below will always use 999 as
+  sandbox_id on write
+  ```ruby
+  class Sandboxable < ActiveRecord::Base
+      include Sandboxable::ActiveRecord
+      
+      sandbox_with set_sandbox_proc: ->{ 999 }
+   end
+   ``` 
+  - You can also pass a strategy name to use, in that case the #default_set_proc and the #default_proc methods of the strategy will be used
+  ```ruby
+  class Sandboxable < ActiveRecord::Base
+        include Sandboxable::ActiveRecord
+        
+        sandbox_with strategy: "sandboxable/active_record/multiple_sandbox_strategy"
+     end
+  ```
   
   NOTE: You can use ```Sandboxable::ANY_SANDBOX``` for current sandbox_id and that allow
   you to skip the sandbox_id data partitioning

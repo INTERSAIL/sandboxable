@@ -35,7 +35,8 @@ module Sandboxable
     end
 
     def set_sandbox_field
-      send("#{self.class.sandbox_field}=", Sandboxable::ActiveRecord.current_sandbox_id) if self.class.persist
+      proc = self.class.set_sandbox_proc ||  Sandboxable::ActiveRecord.default_set_proc
+      send("#{self.class.sandbox_field}=", proc.call) if self.class.persist
     end
 
     private :set_sandbox_field
@@ -52,6 +53,11 @@ module Sandboxable
       def default_proc
         -> { where(self.sandbox_field => Sandboxable::ActiveRecord.current_sandbox_id) }
       end
+
+      # Returns the value to set for the sandbox_field
+      def default_set_proc
+        -> { Sandboxable::ActiveRecord.current_sandbox_id }
+      end
     end
 
     module ClassMethods
@@ -61,6 +67,9 @@ module Sandboxable
       #   - persist: when true sets the sandbox_id field in the before_save callback to the
       #              Sandboxable::ActiveRecord.current_sandbox_id value. default: true
       #   - serialize_sandbox_field: when false the sandbox_field will not be serialized default: false
+      #   - set_sandbox_proc: you can use a custom proc to obtain the sandbox_id to use when saving a new record
+      #   - strategy: you can pass in a strategy class name to use, in that case the #default_set_proc and the #default_proc
+      #               methods of the strategy will be used. This option overrides the @sandbox_proc and @set_sandbox_proc variables
       #
       # NOTE: You can pass a block it will be used as default scope instead of the default_proc
       #
@@ -72,11 +81,18 @@ module Sandboxable
       #     where(:test_id => self.current_sandbox_id)
       #   end
       def sandbox_with(options = {}, &block)
-        options.reverse_merge! field: :sandbox_id, persist: true, serialize_sandbox_field: false
+        options.reverse_merge!({
+              field: :sandbox_id,
+              persist: true,
+              serialize_sandbox_field: false
+        })
         @sandbox_field = options[:field]
         @persist = options[:persist]
         @serialize_sandbox_field = options[:serialize_sandbox_field]
+        @set_sandbox_proc = options.fetch(:set_sandbox_proc, false)
         @sandbox_proc = block if block
+
+        override_procs_with_strategy options.fetch(:strategy, false)
       end
 
       def sandbox_field
@@ -89,6 +105,10 @@ module Sandboxable
 
       def serialize_sandbox_field
         @serialize_sandbox_field.nil? ? false : @serialize_sandbox_field
+      end
+
+      def set_sandbox_proc
+        @set_sandbox_proc
       end
 
       # Allow you to pass a custom block that runs ignoring the sandbox proc
@@ -105,6 +125,15 @@ module Sandboxable
 
       def disabled=(val)
         RequestStore.store[:sandbox_disabled] = val
+      end
+
+      private
+
+      def override_procs_with_strategy(strategy_name)
+        return unless strategy_name
+        strategy_class = strategy_name.camelize.constantize
+        @sandbox_proc = strategy_class.send("default_proc")
+        @set_sandbox_proc = strategy_class.send("default_set_proc")
       end
     end
   end
