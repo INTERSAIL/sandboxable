@@ -25,7 +25,7 @@ module Sandboxable
         end
         -> {}
       }
-      before_save :set_sandbox_field
+      before_create :set_sandbox_field
     end
 
     def as_json(options={})

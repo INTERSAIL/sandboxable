@@ -33,7 +33,7 @@ module Sandboxable
       end
     end
 
-    describe '#before_save' do
+    describe '#before_create' do
       after { SandboxableModel.instance_variable_set("@sandbox_proc", nil) }
       context 'persist=true' do
         before do
@@ -42,14 +42,26 @@ module Sandboxable
           end
         end
         context 'set_sandbox_proc not given' do
-          it 'uses default_set_proc and sets the sandbox_id field value to Sandboxable::ActiveRecord.current_sandbox_id' do
-            expect(SandboxableModel.create(name: "persist=true").sandbox_id).to eq(1)
+          context 'fresh model' do
+            it 'uses default_set_proc and sets the sandbox_id field value to Sandboxable::ActiveRecord.current_sandbox_id' do
+              expect(SandboxableModel.create(name: "persist=true").sandbox_id).to eq(1)
+            end
+          end
+          context 'existing model and sandbox changes' do
+            before do
+              @model_1 = SandboxableModel.create(name: "persist=true")
+              current_sandbox_id 9
+            end
+            it 'does not change sandbox_id' do
+              @model_1.save
+              expect(@model_1.sandbox_id).to eq(1)
+            end
           end
         end
         context 'set_sandbox_proc given' do
           before do
             SandboxableModel.class_eval do
-              sandbox_with persist: true, set_sandbox_proc: ->{ 999 }
+              sandbox_with persist: true, set_sandbox_proc: -> { 999 }
             end
           end
           it 'uses the given proc to set the sandbox field' do
