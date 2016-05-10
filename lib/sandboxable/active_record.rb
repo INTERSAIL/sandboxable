@@ -36,7 +36,7 @@ module Sandboxable
 
     def set_sandbox_field
       proc = self.class.set_sandbox_proc ||  Sandboxable::ActiveRecord.default_set_proc
-      send("#{self.class.sandbox_field}=", proc.call) if self.class.persist
+      send("#{self.class.sandbox_field}=", proc.respond_to?(:call) ? proc.call : self.send(proc)) if self.class.persist
     end
 
     private :set_sandbox_field
